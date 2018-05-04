@@ -17,7 +17,7 @@ router
         return res.json(user);
       })
       .catch(err => {
-        res.status(500).json({ error: err });
+        return res.status(500).json({ error: err });
       });
   })
   .delete();
@@ -42,10 +42,37 @@ router.route('/login').post((req, res) => {
       return res.json(user);
     })
     .catch(err => {
-      res.status(500).json({ error: err });
+      return res.status(500).json({ error: err });
     });
 });
 
-router.route('/register').post();
+router.route('/register').post((req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  knex
+    .raw('SELECT * FROM users WHERE email = ?', [email])
+    .then(resp => {
+      let rowCount = resp.rowCount;
+      let user = resp.rows[0];
+      if (rowCount !== 0) {
+        return res.status(400).json({ message: 'User already exists' });
+      }
+      knex
+        .raw('INSERT INTO users (email,password) VALUES(?,?) RETURNING *', [
+          email,
+          password
+        ])
+        .then(resp => {
+          let user = resp.rows[0];
+          return res.json(user);
+        })
+        .catch(err => {
+          return res.status(500).json({ error: err });
+        });
+    })
+    .catch(err => {
+      return res.status(500).json({ error: err });
+    });
+});
 
 module.exports = router;
