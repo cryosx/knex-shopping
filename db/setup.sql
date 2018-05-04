@@ -6,6 +6,7 @@ knex_shopping_user;
 
 \c knex_shopping knex_shopping_user
 
+DROP TABLE IF EXISTS purchases;
 DROP TABLE IF EXISTS cart;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS products;
@@ -39,6 +40,14 @@ CREATE TABLE IF NOT EXISTS cart
   updated_at timestamp without time zone NOT NULL DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS purchases
+(
+  id serial PRIMARY KEY,
+  user_id integer NOT NULL REFERENCES users (id),
+  products_id integer NOT NULL REFERENCES products (id),
+  created_at timestamp without time zone NOT NULL DEFAULT now()
+);
+
 INSERT INTO users (email, password)
 VALUES ('test@test.com','test');
 
@@ -48,7 +57,8 @@ VALUES ('test2@test.com','test2');
 
 INSERT INTO products (title, description, inventory, price)
 VALUES ('testo','testo',1,11.00);
-
+INSERT INTO products (title, description, inventory, price)
+VALUES ('testo2','testo2',12,112.00);
 
 INSERT INTO cart (user_id, products_id)
 VALUES (1,1);
@@ -56,5 +66,11 @@ INSERT INTO cart (user_id, products_id)
 VALUES (1,1);
 INSERT INTO cart (user_id, products_id)
 VALUES (2,1);
--- SELECT *
--- FROM users;
+
+
+INSERT INTO purchases (user_id, products_id)
+VALUES (1,1);
+INSERT INTO purchases (user_id, products_id)
+VALUES (1,2);
+INSERT INTO purchases (user_id, products_id)
+VALUES (2,2);
