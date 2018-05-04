@@ -49,7 +49,7 @@ router.route('/:user_id/forgot-password').put((req, res) => {
         return res.status(404).json({ message: 'Something is up' });
       }
       knex
-        .raw('UPDATE users SET password = ? WHERE id = ?', [
+        .raw('UPDATE users SET password = ?, updated_at = now() WHERE id = ?', [
           updatedPassword,
           user_id
         ])
