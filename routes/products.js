@@ -1,6 +1,8 @@
 const express = require('express');
-const router = express.Router();
+
 const knex = require('../db');
+
+const router = express.Router();
 
 router.route('/').get((req, res) => {
   return knex
@@ -38,10 +40,15 @@ router
     const validFields = ['title', 'description', 'inventory', 'price'];
     let productFields = [];
     let productValues = [];
+    let garbageFields = [];
+    let garbageValues = [];
     for (const key in data) {
       if (validFields.includes(key)) {
         productFields.push(key);
         productValues.push(data[key]);
+      } else {
+        garbageFields.push(key);
+        garbageValues.push(data[key]);
       }
     }
 
@@ -99,7 +106,7 @@ router.route('/new').post((req, res) => {
   });
 
   if (!allFields) {
-    return res.status(404).json({ error: 'Must POST all product fields' });
+    return res.status(400).json({ error: 'Must POST all product fields' });
   }
 
   const title = data.title.trim();

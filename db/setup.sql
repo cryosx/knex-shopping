@@ -13,8 +13,8 @@ DROP TABLE IF EXISTS products;
 CREATE TABLE IF NOT EXISTS users
 (
   id serial NOT NULL PRIMARY KEY,
-  email varchar(255) NOT NULL,
-  password varchar(255) NOT NULL,
+  email varchar(255) NOT NULL UNIQUE CHECK (email != ''),
+  password varchar(255) NOT NULL CHECK (password != ''),
   created_at timestamp without time zone NOT NULL DEFAULT now(),
   updated_at timestamp without time zone NOT NULL DEFAULT now()
 );
@@ -22,10 +22,10 @@ CREATE TABLE IF NOT EXISTS users
 CREATE TABLE IF NOT EXISTS products
 (
   id serial NOT NULL PRIMARY KEY,
-  title varchar(255) NOT NULL,
-  description text NOT NULL,
-  inventory integer NOT NULL DEFAULT 0,
-  price decimal(8,2) NOT NULL,
+  title varchar(255) NOT NULL CHECK (title != ''),
+  description text NOT NULL CHECK (description != ''),
+  inventory integer NOT NULL DEFAULT 0 CHECK (inventory >= 0),
+  price money NOT NULL,
   created_at timestamp without time zone NOT NULL DEFAULT now(),
   updated_at timestamp without time zone NOT NULL DEFAULT now()
 );
@@ -42,5 +42,19 @@ CREATE TABLE IF NOT EXISTS cart
 INSERT INTO users (email, password)
 VALUES ('test@test.com','test');
 
+INSERT INTO users (email, password)
+VALUES ('test2@test.com','test2');
+
+
+INSERT INTO products (title, description, inventory, price)
+VALUES ('testo','testo',1,11.00);
+
+
+INSERT INTO cart (user_id, products_id)
+VALUES (1,1);
+INSERT INTO cart (user_id, products_id)
+VALUES (1,1);
+INSERT INTO cart (user_id, products_id)
+VALUES (2,1);
 -- SELECT *
 -- FROM users;

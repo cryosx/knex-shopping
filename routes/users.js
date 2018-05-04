@@ -1,6 +1,8 @@
 const express = require('express');
-const router = express.Router();
+
 const knex = require('../db');
+
+const router = express.Router();
 
 router
   .route('/:user_id')
@@ -66,7 +68,7 @@ router.route('/:user_id/forgot-password').put((req, res) => {
 });
 
 router.route('/login').post((req, res) => {
-  const email = req.body.email;
+  const email = req.body.email.toLowerCase().trim();
   const attemptPassword = req.body.password;
   return knex
     .raw('SELECT * FROM users WHERE email = ?', [email])
@@ -88,7 +90,19 @@ router.route('/login').post((req, res) => {
 });
 
 router.route('/register').post((req, res) => {
-  const email = req.body.email;
+  const data = req.body;
+  const validFields = ['email', 'password'];
+  const dataFields = Object.keys(data);
+
+  let allFields = validFields.every(function(value) {
+    return dataFields.includes(value);
+  });
+
+  if (!allFields) {
+    return res.status(400).json({ error: 'Must POST all product fields' });
+  }
+
+  const email = req.body.email.toLowerCase().trim();
   const password = req.body.password;
   return knex
     .raw('SELECT * FROM users WHERE email = ?', [email])
@@ -97,7 +111,7 @@ router.route('/register').post((req, res) => {
       if (rowCount !== 0) {
         return res.status(400).json({ message: 'User already exists' });
       }
-      knex
+      return knex
         .raw('INSERT INTO users (email,password) VALUES(?,?) RETURNING *', [
           email,
           password
