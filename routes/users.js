@@ -6,14 +6,14 @@ router
   .route('/:user_id')
   .get((req, res) => {
     const user_id = req.params.user_id;
-    knex
+    return knex
       .raw('SELECT * FROM users WHERE id = ?', [user_id])
       .then(resp => {
         let rowCount = resp.rowCount;
-        let user = resp.rows[0];
         if (rowCount !== 1) {
           return res.status(404).json({ message: 'User not found' });
         }
+        let user = resp.rows[0];
         return res.json(user);
       })
       .catch(err => {
@@ -22,15 +22,15 @@ router
   })
   .delete((req, res) => {
     const user_id = req.params.user_id;
-    knex
+    return knex
       .raw('DELETE FROM users WHERE id = ? RETURNING *', [user_id])
       .then(resp => {
         console.log(resp);
         let rowCount = resp.rowCount;
-        let user = resp.rows[0];
         if (rowCount !== 1) {
           return res.status(404).json({ message: 'User ID not found' });
         }
+        let user = resp.rows[0];
         return res.json({ message: `User id:${user_id} successfully deleted` });
       })
       .catch(err => {
@@ -41,11 +41,10 @@ router
 router.route('/:user_id/forgot-password').put((req, res) => {
   const user_id = req.params.user_id;
   const updatedPassword = req.body.password;
-  knex
+  return knex
     .raw('SELECT * FROM users WHERE id = ?', [user_id])
     .then(resp => {
       let rowCount = resp.rowCount;
-      let user = resp.rows[0];
       if (rowCount !== 1) {
         return res.status(404).json({ message: 'Something is up' });
       }
@@ -69,14 +68,14 @@ router.route('/:user_id/forgot-password').put((req, res) => {
 router.route('/login').post((req, res) => {
   const email = req.body.email;
   const attemptPassword = req.body.password;
-  knex
+  return knex
     .raw('SELECT * FROM users WHERE email = ?', [email])
     .then(resp => {
       let rowCount = resp.rowCount;
-      let user = resp.rows[0];
       if (rowCount !== 1) {
         return res.status(404).json({ message: 'User not found' });
       }
+      let user = resp.rows[0];
       let userPassword = user.password;
       if (attemptPassword != userPassword) {
         return res.status(401).json({ message: 'Incorrect password' });
@@ -91,11 +90,10 @@ router.route('/login').post((req, res) => {
 router.route('/register').post((req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  knex
+  return knex
     .raw('SELECT * FROM users WHERE email = ?', [email])
     .then(resp => {
       let rowCount = resp.rowCount;
-      let user = resp.rows[0];
       if (rowCount !== 0) {
         return res.status(400).json({ message: 'User already exists' });
       }
