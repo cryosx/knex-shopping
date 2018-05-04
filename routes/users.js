@@ -20,9 +20,51 @@ router
         return res.status(500).json({ error: err });
       });
   })
-  .delete();
+  .delete((req, res) => {
+    const user_id = req.params.user_id;
+    knex
+      .raw('DELETE FROM users WHERE id = ? RETURNING *', [user_id])
+      .then(resp => {
+        console.log(resp);
+        let rowCount = resp.rowCount;
+        let user = resp.rows[0];
+        if (rowCount !== 1) {
+          return res.status(404).json({ message: 'User ID not found' });
+        }
+        return res.json({ message: `User id:${user_id} successfully deleted` });
+      })
+      .catch(err => {
+        return res.status(500).json({ error: err });
+      });
+  });
 
-router.route('/:user_id/forgot-password').put();
+router.route('/:user_id/forgot-password').put((req, res) => {
+  const user_id = req.params.user_id;
+  const updatedPassword = req.body.password;
+  knex
+    .raw('SELECT * FROM users WHERE id = ?', [user_id])
+    .then(resp => {
+      let rowCount = resp.rowCount;
+      let user = resp.rows[0];
+      if (rowCount !== 1) {
+        return res.status(404).json({ message: 'Something is up' });
+      }
+      knex
+        .raw('UPDATE users SET password = ? WHERE id = ?', [
+          updatedPassword,
+          user_id
+        ])
+        .then(resp => {
+          return res.json({ message: 'New password created!' });
+        })
+        .catch(err => {
+          return res.status(500).json({ error: err });
+        });
+    })
+    .catch(err => {
+      return res.status(500).json({ error: err });
+    });
+});
 
 router.route('/login').post((req, res) => {
   const email = req.body.email;
